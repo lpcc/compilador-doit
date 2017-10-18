@@ -50,7 +50,13 @@ BLOCO		: '{' COMANDOS '}'
 			;
 
 COMANDOS	: COMANDO COMANDOS
-			|
+			{
+				$$.traducao = $1.traducao + $2.traducao;
+			}
+			| 
+			{
+				$$.traducao = "";
+			}
 			;
 
 COMANDO 	: E ';'
@@ -59,22 +65,22 @@ COMANDO 	: E ';'
 E 			: E '+' E
 			{
 				$$.label = geradora();
-				$$.traducao = $1.traducao + $3.traducao + "\t" + $$.label + " = " + $1.label + " + " + $3.label +" ;\n";
+				$$.traducao = $1.traducao + $3.traducao + "\t" + $$.label + " = " + $1.label + " + " + $3.label +";\n\n";
 			}
 			|E '-' E
 			{
 				$$.label = geradora();
-				$$.traducao = $1.traducao + $3.traducao + "\t" + $$.label + " = " + $1.label + " - " + $3.label +" ;\n";
+				$$.traducao = $1.traducao + $3.traducao + "\t" + $$.label + " = " + $1.label + " - " + $3.label +";\n\n";
 			}
 			|E '*' E
 			{
 				$$.label = geradora();
-				$$.traducao = $1.traducao + $3.traducao + "\t" + $$.label + " = " + $1.label + " * " + $3.label +" ;\n";
+				$$.traducao = $1.traducao + $3.traducao + "\t" + $$.label + " = " + $1.label + " * " + $3.label +";\n\n";
 			}
 			|E '/' E
 			{
 				$$.label = geradora();
-				$$.traducao = $1.traducao + $3.traducao + "\t" + $$.label + " = " + $1.label + " / " + $3.label +" ;\n";
+				$$.traducao = $1.traducao + $3.traducao + "\t" + $$.label + " = " + $1.label + " / " + $3.label +";\n\n";
 			}
 			|'(' E ')'
 			{
@@ -84,7 +90,6 @@ E 			: E '+' E
 			| T
 			| LOGICA
 			| RELACIONAL
-			|
 			;
 
 T    		: TK_INT
@@ -170,6 +175,7 @@ RELACIONAL 	: E TK_MAIOR E
 				$$.traducao = $1.traducao + $3.traducao + '\t' +
 				$$.label + " = " + $1.label + " != " + $3.label + ";\n\n";	
 			}
+
 			;
 
 %%
