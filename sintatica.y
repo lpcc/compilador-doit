@@ -65,27 +65,27 @@ COMANDO 	: E ';'
 E 			: E '+' E
 			{
 				$$.label = geradora();
-				$$.traducao = $1.traducao + $3.traducao + "\t" + $$.label + " = " + $1.label + " + " + $3.label +";\n\n";
+				$$.traducao = $1.traducao + $3.traducao + "\t" + $$.label + " = " + $1.label + " + " + $3.label +";\n";
 			}
 			|E '-' E
 			{
 				$$.label = geradora();
-				$$.traducao = $1.traducao + $3.traducao + "\t" + $$.label + " = " + $1.label + " - " + $3.label +";\n\n";
+				$$.traducao = $1.traducao + $3.traducao + "\t" + $$.label + " = " + $1.label + " - " + $3.label +";\n";
 			}
 			|E '*' E
 			{
 				$$.label = geradora();
-				$$.traducao = $1.traducao + $3.traducao + "\t" + $$.label + " = " + $1.label + " * " + $3.label +";\n\n";
+				$$.traducao = $1.traducao + $3.traducao + "\t" + $$.label + " = " + $1.label + " * " + $3.label +";\n";
 			}
 			|E '/' E
 			{
 				$$.label = geradora();
-				$$.traducao = $1.traducao + $3.traducao + "\t" + $$.label + " = " + $1.label + " / " + $3.label +";\n\n";
+				$$.traducao = $1.traducao + $3.traducao + "\t" + $$.label + " = " + $1.label + " / " + $3.label +";\n";
 			}
 			|'(' E ')'
 			{
-				$$.label = "(" + $3.label +")";
-				$$.traducao = $2.traducao;
+				$$.label = "(" + $2.label + ")";
+				$$.traducao = $2.traducao;	
 			}
 			| T
 			| LOGICA
@@ -95,27 +95,27 @@ E 			: E '+' E
 T    		: TK_INT
 			{
 				$$.label = geradora();
-				$$.traducao = "\t" + $$.tipo + " " + $$.label + " = " + $1.label + ";\n\n";
+				$$.traducao = "\t" + $$.tipo + " " + $$.label + " = " + $1.label + ";\n";
 			}
 			| TK_BOOLEAN
 			{
 				$$.label = geradora();
-				$$.traducao = "\t" + $$.tipo + " " + $$.label + " = " + $1.label + ";\n\n";
+				$$.traducao = "\t" + $$.tipo + " " + $$.label + " = " + $1.label + ";\n";
 			}
 			| TK_CHAR
 			{
 				$$.label = geradora();
-				$$.traducao = "\t" + $$.tipo + " " + $$.label + " = " + $1.label + ";\n\n";
+				$$.traducao = "\t" + $$.tipo + " " + $$.label + " = " + $1.label + ";\n";
 			}
 			| TK_ID
 			{
 				$$.label = geradora();
-				$$.traducao = "\t" + $$.tipo + " " + $$.label + " = " + $1.label + ";\n\n";
+				$$.traducao = "\t" + $$.tipo + " " + $$.label + " = " + $1.label + ";\n";
 			}
 			| TK_REAL
 			{
 				$$.label = geradora();
-				$$.traducao = "\t" + $$.tipo + " " + $$.label + " = " + $1.label + ";\n\n";
+				$$.traducao = "\t" + $$.tipo + " " + $$.label + " = " + $1.label + ";\n";
 			}
 			;
 
@@ -123,19 +123,19 @@ LOGICA 		: E TK_E E
 			{
 				$$.label = geradora();
 				$$.traducao = $1.traducao + $3.traducao + "\t" +
-				$$.label + " = " + $1.label + " and " + $3.label + " ;\n\n";
+				$$.label + " = " + $1.label + " and " + $3.label + ";\n";
 			}
 			| E TK_OU E
 			{
 				$$.label = geradora();
 				$$.traducao = $1.traducao + $3.traducao + "\t" +
-				$$.label + " = " + $1.label + " or " + $3.label + " ;\n\n";
+				$$.label + " = " + $1.label + " or " + $3.label + ";\n";
 			}
 			| TK_NEGACAO E
 			{
 				$$.label = geradora();
 				$$.traducao = $2.traducao + "\t" +
-				$$.label + " = " + " not " + $2.label + ";\n\n" ;
+				$$.label + " = " + "not " + $2.label + ";\n";
 			}
 			;
 
@@ -143,39 +143,38 @@ RELACIONAL 	: E TK_MAIOR E
 			{
 				$$.label = geradora();
 				$$.traducao = $1.traducao + $3.traducao + '\t' +
-				$$.label + " = " + $1.label + " > "  + $3.label + ";\n\n";	
+				$$.label + " = " + $1.label + " > "  + $3.label + ";\n";	
 			}
 			| E TK_MAIOR_IGUAL E
 			{
 				$$.label = geradora();
 				$$.traducao = $1.traducao + $3.traducao + '\t' +
-				$$.label + " = " + $1.label + " >= " + $3.label + ";\n\n";	
+				$$.label + " = " + $1.label + " >= " + $3.label + ";\n";	
 			}
 			| E TK_MENOR E
 			{
 				$$.label = geradora();
 				$$.traducao = $1.traducao + $3.traducao + '\t' +
-				$$.label + " = " + $1.label + " < " + $3.label + ";\n\n";	
+				$$.label + " = " + $1.label + " < " + $3.label + ";\n";	
 			}
 			| E TK_MENOR_IGUAL E
 			{
 				$$.label = geradora();
 				$$.traducao = $1.traducao + $3.traducao + '\t' +
-				$$.label + " = " + $1.label + " < " + $3.label + ";\n\n";	
+				$$.label + " = " + $1.label + " <= " + $3.label + ";\n";	
 			}
 			| E TK_IGUAL E
 			{
 				$$.label = geradora();
 				$$.traducao = $1.traducao + $3.traducao + '\t' +
-				$$.label + " = " + $1.label + " == " + $3.label + ";\n\n";	
+				$$.label + " = " + $1.label + " == " + $3.label + ";\n";	
 			}
 			| E TK_DIFERENTE E
 			{
 				$$.label = geradora();
 				$$.traducao = $1.traducao + $3.traducao + '\t' +
-				$$.label + " = " + $1.label + " != " + $3.label + ";\n\n";	
+				$$.label + " = " + $1.label + " != " + $3.label + ";\n";	
 			}
-
 			;
 
 %%

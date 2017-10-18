@@ -909,7 +909,7 @@ YY_RULE_SETUP
 case 23:
 YY_RULE_SETUP
 #line 64 "lexica.l"
-{ yylval.label = yytext; yylval.tipo = "id"; return TK_ID;}
+{ yylval.label = yytext; return TK_ID;}
 	YY_BREAK
 case 24:
 YY_RULE_SETUP

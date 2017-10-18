@@ -61,7 +61,7 @@ ID {LETRA}({LETRA}|{INT})*
 
 {CHAR}		{ yylval.label = yytext; yylval.tipo = "char"; return TK_CHAR;}
 
-{ID}		{ yylval.label = yytext; yylval.tipo = "id"; return TK_ID;}
+{ID}		{ yylval.label = yytext; return TK_ID;}
 
 .			{ *yytext; }
 

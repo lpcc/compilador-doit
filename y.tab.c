@@ -1323,7 +1323,7 @@ yyreduce:
 #line 66 "sintatica.y" /* yacc.c:1646  */
     {
 				(yyval).label = geradora();
-				(yyval).traducao = (yyvsp[-2]).traducao + (yyvsp[0]).traducao + "\t" + (yyval).label + " = " + (yyvsp[-2]).label + " + " + (yyvsp[0]).label +";\n\n";
+				(yyval).traducao = (yyvsp[-2]).traducao + (yyvsp[0]).traducao + "\t" + (yyval).label + " = " + (yyvsp[-2]).label + " + " + (yyvsp[0]).label +";\n";
 			}
 #line 1329 "y.tab.c" /* yacc.c:1646  */
     break;
@@ -1332,7 +1332,7 @@ yyreduce:
 #line 71 "sintatica.y" /* yacc.c:1646  */
     {
 				(yyval).label = geradora();
-				(yyval).traducao = (yyvsp[-2]).traducao + (yyvsp[0]).traducao + "\t" + (yyval).label + " = " + (yyvsp[-2]).label + " - " + (yyvsp[0]).label +";\n\n";
+				(yyval).traducao = (yyvsp[-2]).traducao + (yyvsp[0]).traducao + "\t" + (yyval).label + " = " + (yyvsp[-2]).label + " - " + (yyvsp[0]).label +";\n";
 			}
 #line 1338 "y.tab.c" /* yacc.c:1646  */
     break;
@@ -1341,7 +1341,7 @@ yyreduce:
 #line 76 "sintatica.y" /* yacc.c:1646  */
     {
 				(yyval).label = geradora();
-				(yyval).traducao = (yyvsp[-2]).traducao + (yyvsp[0]).traducao + "\t" + (yyval).label + " = " + (yyvsp[-2]).label + " * " + (yyvsp[0]).label +";\n\n";
+				(yyval).traducao = (yyvsp[-2]).traducao + (yyvsp[0]).traducao + "\t" + (yyval).label + " = " + (yyvsp[-2]).label + " * " + (yyvsp[0]).label +";\n";
 			}
 #line 1347 "y.tab.c" /* yacc.c:1646  */
     break;
@@ -1350,7 +1350,7 @@ yyreduce:
 #line 81 "sintatica.y" /* yacc.c:1646  */
     {
 				(yyval).label = geradora();
-				(yyval).traducao = (yyvsp[-2]).traducao + (yyvsp[0]).traducao + "\t" + (yyval).label + " = " + (yyvsp[-2]).label + " / " + (yyvsp[0]).label +";\n\n";
+				(yyval).traducao = (yyvsp[-2]).traducao + (yyvsp[0]).traducao + "\t" + (yyval).label + " = " + (yyvsp[-2]).label + " / " + (yyvsp[0]).label +";\n";
 			}
 #line 1356 "y.tab.c" /* yacc.c:1646  */
     break;
@@ -1358,8 +1358,8 @@ yyreduce:
   case 11:
 #line 86 "sintatica.y" /* yacc.c:1646  */
     {
-				(yyval).label = "(" + (yyvsp[0]).label +")";
-				(yyval).traducao = (yyvsp[-1]).traducao;
+				(yyval).label = "(" + (yyvsp[-1]).label + ")";
+				(yyval).traducao = (yyvsp[-1]).traducao;	
 			}
 #line 1365 "y.tab.c" /* yacc.c:1646  */
     break;
@@ -1368,7 +1368,7 @@ yyreduce:
 #line 96 "sintatica.y" /* yacc.c:1646  */
     {
 				(yyval).label = geradora();
-				(yyval).traducao = "\t" + (yyval).tipo + " " + (yyval).label + " = " + (yyvsp[0]).label + ";\n\n";
+				(yyval).traducao = "\t" + (yyval).tipo + " " + (yyval).label + " = " + (yyvsp[0]).label + ";\n";
 			}
 #line 1374 "y.tab.c" /* yacc.c:1646  */
     break;
@@ -1377,7 +1377,7 @@ yyreduce:
 #line 101 "sintatica.y" /* yacc.c:1646  */
     {
 				(yyval).label = geradora();
-				(yyval).traducao = "\t" + (yyval).tipo + " " + (yyval).label + " = " + (yyvsp[0]).label + ";\n\n";
+				(yyval).traducao = "\t" + (yyval).tipo + " " + (yyval).label + " = " + (yyvsp[0]).label + ";\n";
 			}
 #line 1383 "y.tab.c" /* yacc.c:1646  */
     break;
@@ -1386,7 +1386,7 @@ yyreduce:
 #line 106 "sintatica.y" /* yacc.c:1646  */
     {
 				(yyval).label = geradora();
-				(yyval).traducao = "\t" + (yyval).tipo + " " + (yyval).label + " = " + (yyvsp[0]).label + ";\n\n";
+				(yyval).traducao = "\t" + (yyval).tipo + " " + (yyval).label + " = " + (yyvsp[0]).label + ";\n";
 			}
 #line 1392 "y.tab.c" /* yacc.c:1646  */
     break;
@@ -1395,7 +1395,7 @@ yyreduce:
 #line 111 "sintatica.y" /* yacc.c:1646  */
     {
 				(yyval).label = geradora();
-				(yyval).traducao = "\t" + (yyval).tipo + " " + (yyval).label + " = " + (yyvsp[0]).label + ";\n\n";
+				(yyval).traducao = "\t" + (yyval).tipo + " " + (yyval).label + " = " + (yyvsp[0]).label + ";\n";
 			}
 #line 1401 "y.tab.c" /* yacc.c:1646  */
     break;
@@ -1404,7 +1404,7 @@ yyreduce:
 #line 116 "sintatica.y" /* yacc.c:1646  */
     {
 				(yyval).label = geradora();
-				(yyval).traducao = "\t" + (yyval).tipo + " " + (yyval).label + " = " + (yyvsp[0]).label + ";\n\n";
+				(yyval).traducao = "\t" + (yyval).tipo + " " + (yyval).label + " = " + (yyvsp[0]).label + ";\n";
 			}
 #line 1410 "y.tab.c" /* yacc.c:1646  */
     break;
@@ -1414,7 +1414,7 @@ yyreduce:
     {
 				(yyval).label = geradora();
 				(yyval).traducao = (yyvsp[-2]).traducao + (yyvsp[0]).traducao + "\t" +
-				(yyval).label + " = " + (yyvsp[-2]).label + " and " + (yyvsp[0]).label + " ;\n\n";
+				(yyval).label + " = " + (yyvsp[-2]).label + " and " + (yyvsp[0]).label + ";\n";
 			}
 #line 1420 "y.tab.c" /* yacc.c:1646  */
     break;
@@ -1424,7 +1424,7 @@ yyreduce:
     {
 				(yyval).label = geradora();
 				(yyval).traducao = (yyvsp[-2]).traducao + (yyvsp[0]).traducao + "\t" +
-				(yyval).label + " = " + (yyvsp[-2]).label + " or " + (yyvsp[0]).label + " ;\n\n";
+				(yyval).label + " = " + (yyvsp[-2]).label + " or " + (yyvsp[0]).label + ";\n";
 			}
 #line 1430 "y.tab.c" /* yacc.c:1646  */
     break;
@@ -1434,7 +1434,7 @@ yyreduce:
     {
 				(yyval).label = geradora();
 				(yyval).traducao = (yyvsp[0]).traducao + "\t" +
-				(yyval).label + " = " + " not " + (yyvsp[0]).label + ";\n\n" ;
+				(yyval).label + " = " + " not " + (yyvsp[0]).label + ";\n";
 			}
 #line 1440 "y.tab.c" /* yacc.c:1646  */
     break;
@@ -1444,7 +1444,7 @@ yyreduce:
     {
 				(yyval).label = geradora();
 				(yyval).traducao = (yyvsp[-2]).traducao + (yyvsp[0]).traducao + '\t' +
-				(yyval).label + " = " + (yyvsp[-2]).label + " > "  + (yyvsp[0]).label + ";\n\n";	
+				(yyval).label + " = " + (yyvsp[-2]).label + " > "  + (yyvsp[0]).label + ";\n";	
 			}
 #line 1450 "y.tab.c" /* yacc.c:1646  */
     break;
@@ -1454,7 +1454,7 @@ yyreduce:
     {
 				(yyval).label = geradora();
 				(yyval).traducao = (yyvsp[-2]).traducao + (yyvsp[0]).traducao + '\t' +
-				(yyval).label + " = " + (yyvsp[-2]).label + " >= " + (yyvsp[0]).label + ";\n\n";	
+				(yyval).label + " = " + (yyvsp[-2]).label + " >= " + (yyvsp[0]).label + ";\n";	
 			}
 #line 1460 "y.tab.c" /* yacc.c:1646  */
     break;
@@ -1464,7 +1464,7 @@ yyreduce:
     {
 				(yyval).label = geradora();
 				(yyval).traducao = (yyvsp[-2]).traducao + (yyvsp[0]).traducao + '\t' +
-				(yyval).label + " = " + (yyvsp[-2]).label + " < " + (yyvsp[0]).label + ";\n\n";	
+				(yyval).label + " = " + (yyvsp[-2]).label + " < " + (yyvsp[0]).label + ";\n";	
 			}
 #line 1470 "y.tab.c" /* yacc.c:1646  */
     break;
@@ -1474,7 +1474,7 @@ yyreduce:
     {
 				(yyval).label = geradora();
 				(yyval).traducao = (yyvsp[-2]).traducao + (yyvsp[0]).traducao + '\t' +
-				(yyval).label + " = " + (yyvsp[-2]).label + " < " + (yyvsp[0]).label + ";\n\n";	
+				(yyval).label + " = " + (yyvsp[-2]).label + " < " + (yyvsp[0]).label + ";\n";	
 			}
 #line 1480 "y.tab.c" /* yacc.c:1646  */
     break;
@@ -1484,7 +1484,7 @@ yyreduce:
     {
 				(yyval).label = geradora();
 				(yyval).traducao = (yyvsp[-2]).traducao + (yyvsp[0]).traducao + '\t' +
-				(yyval).label + " = " + (yyvsp[-2]).label + " == " + (yyvsp[0]).label + ";\n\n";	
+				(yyval).label + " = " + (yyvsp[-2]).label + " == " + (yyvsp[0]).label + ";\n";	
 			}
 #line 1490 "y.tab.c" /* yacc.c:1646  */
     break;
@@ -1494,7 +1494,7 @@ yyreduce:
     {
 				(yyval).label = geradora();
 				(yyval).traducao = (yyvsp[-2]).traducao + (yyvsp[0]).traducao + '\t' +
-				(yyval).label + " = " + (yyvsp[-2]).label + " != " + (yyvsp[0]).label + ";\n\n";	
+				(yyval).label + " = " + (yyvsp[-2]).label + " != " + (yyvsp[0]).label + ";\n";	
 			}
 #line 1500 "y.tab.c" /* yacc.c:1646  */
     break;
@@ -1728,7 +1728,7 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 181 "sintatica.y" /* yacc.c:1906  */
+#line 180 "sintatica.y" /* yacc.c:1906  */
 
 
 #include "lex.yy.c"
