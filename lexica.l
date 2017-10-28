@@ -8,12 +8,11 @@ DIGITO [0-9]
 LETRA [A-Za-z_]
 
 DELIM {ESPACO}+
-INT {DIGITO}+
-
+NUM {DIGITO}+
 BOOLEAN "TRUE"|"FALSE"
-REAL {INT}+("."{INT}+)?
-CHAR \'({LETRA}|{INT})\'
-ID {LETRA}({LETRA}|{INT})*
+REAL {NUM}+("."{NUM}+)?
+CHAR \'({LETRA}|{NUM})\'
+ID {LETRA}({LETRA}|{NUM})*
 
 %%
 
@@ -27,13 +26,15 @@ ID {LETRA}({LETRA}|{INT})*
 
 "int"		{return TK_TIPO_INT;}
 
-"float"		{return TK_TIPO_REAL;}
+"float"		{return TK_TIPO_FLOAT;}
 
 "char"		{return TK_TIPO_CHAR;}
 
 [(){}[\];,]	{return *yytext;}
 
 [+\-*/]		{return *yytext;}
+
+"="			{return *yytext;}
 
 ">"			{return TK_MAIOR;}
 
@@ -53,16 +54,16 @@ ID {LETRA}({LETRA}|{INT})*
 
 "!"			{return TK_NEGACAO;}
 
-{INT}		{ yylval.label = yytext; yylval.tipo = "int" ;return TK_INT;}
+{NUM}		{ yylval.label = yytext; yylval.tipo = "int" ;return TK_INT;}
 
 {BOOLEAN}	{ yylval.label = yytext; yylval.tipo = "boolean" ;return TK_BOOLEAN;}
 
-{REAL}		{ yylval.label = yytext; yylval.tipo = "float"; return TK_REAL;}
+{REAL}		{ yylval.label = yytext; yylval.tipo = "float"; return TK_FLOAT;}
 
 {CHAR}		{ yylval.label = yytext; yylval.tipo = "char"; return TK_CHAR;}
 
 {ID}		{ yylval.label = yytext; return TK_ID;}
 
-.			{ *yytext; }
+.		{ *yytext; }
 
 %%

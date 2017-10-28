@@ -1,0 +1,8 @@
+int main()
+{
+
+	float a;
+	float b, c;
+	float d = 3;
+	int e, f = 3;
+}
