@@ -65,7 +65,9 @@ extern int yydebug;
     TK_E = 275,
     TK_NEGACAO = 276,
     TK_FIM = 277,
-    TK_ERROR = 278
+    TK_ERROR = 278,
+    TK_IF = 279,
+    TK_ELSE = 280
   };
 #endif
 /* Tokens.  */
@@ -90,6 +92,8 @@ extern int yydebug;
 #define TK_NEGACAO 276
 #define TK_FIM 277
 #define TK_ERROR 278
+#define TK_IF 279
+#define TK_ELSE 280
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED

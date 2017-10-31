@@ -9,7 +9,7 @@ LETRA [A-Za-z_]
 
 DELIM {ESPACO}+
 NUM {DIGITO}+
-BOOLEAN "TRUE"|"FALSE"
+BOOLEAN "true"|"false"
 REAL {NUM}+("."{NUM}+)?
 CHAR \'({LETRA}|{NUM})\'
 ID {LETRA}({LETRA}|{NUM})*
@@ -23,6 +23,10 @@ ID {LETRA}({LETRA}|{NUM})*
 "main"		{return TK_MAIN;}
 
 "boolean"	{return TK_TIPO_BOOLEAN;}
+
+"if"		{ return TK_IF; }
+
+"else"		{ return TK_ELSE; }
 
 "int"		{return TK_TIPO_INT;}
 
@@ -64,6 +68,6 @@ ID {LETRA}({LETRA}|{NUM})*
 
 {ID}		{ yylval.label = yytext; return TK_ID;}
 
-.		{ *yytext; }
+.			{ *yytext;}
 
 %%

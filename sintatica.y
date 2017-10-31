@@ -8,31 +8,29 @@
 #define YYSTYPE atributos
 
 using namespace std;
-int static numero = -1;
-int qtd = 0;
+int q = 0;
 
 struct atributos
 {
 	string label;
 	string tipo;
 	string traducao;
-	string valor;
 };
 
 typedef struct atributos Atributos;
-typedef map<string, Atributos> STRINGMAP;
-list<STRINGMAP*> pilhaDeMapas;
+typedef map<string, Atributos> MAPA;
+list<MAPA*> pilhaDeMapas;
 string variaveis;
 
 int yylex(void);
 void yyerror(string);
-string converter();
-string geradora();
-
-STRINGMAP* buscarTkId(string label);
-bool pertenceAoAtualEscopo(string label);
+string gerarVarTemp();
+//string geradora();
+MAPA* buscaMapa (string label);
 string declaracoes();
-
+bool verificarDeclaracao(string label);
+string gerarBloco();
+string decidirValorBool(string a);
 
 %}
 %token TK_MAIN
@@ -41,6 +39,7 @@ string declaracoes();
 %token TK_MAIOR TK_MAIOR_IGUAL TK_MENOR TK_MENOR_IGUAL TK_IGUAL
 %token TK_DIFERENTE TK_OU TK_E TK_NEGACAO
 %token TK_FIM TK_ERROR
+%token TK_IF TK_ELSE
 
 %start START
 
@@ -52,26 +51,30 @@ string declaracoes();
 
 START			: ESCOPO_GLOBAL MAIN
 				{ 
-					cout << "*Compilador DOIT* \n#include<string.h>\n#include<iostream>\n#include<stdio.h>\nusing namespace std;\n" << endl;
+					cout << "\n*Compilador DOIT* \n#include<string.h>\n#include<iostream>\n#include<stdio.h>\nusing namespace std;\n" << endl;
 					cout << variaveis << endl;
 					declaracoes();			
 					cout << $2.traducao << endl;
 				}
 				;
 
-MAIN			: TK_TIPO_INT TK_MAIN  '(' ')' BLOCO {$$.traducao = "int main(void)\n{\n" + $5.traducao + "\treturn 0;\n}\n\n"; };
+MAIN			: TK_TIPO_INT TK_MAIN  '(' ')' BLOCO 
+				{
+					$$.traducao = "int main(void)\n{\n" + $5.traducao + "\treturn 0;\n}\n\n"; 
+				}
+				;
 
 ESCOPO_GLOBAL	:
 				{
-					STRINGMAP* mapa = new STRINGMAP();
+					MAPA* mapa = new MAPA();
 					pilhaDeMapas.push_front(mapa);
 				} 
 				;
 
 INICIO_ESCOPO	: '{'
-				{	STRINGMAP* mapa = new STRINGMAP();
+				{	
+					MAPA* mapa = new MAPA();
 					pilhaDeMapas.push_front(mapa);
-					cout << "\nAbertura: "<< pilhaDeMapas.size() << endl;
 					$$.traducao = "";
 				}
 				;
@@ -80,7 +83,6 @@ FIM_ESCOPO		: '}'
 				{	
 					declaracoes();				
 					pilhaDeMapas.pop_front();
-					cout << "\nFechamento: " << pilhaDeMapas.size()<< "\n " << endl;
 					$$.traducao = "";
 
 				}
@@ -106,6 +108,7 @@ COMANDOS		: COMANDO COMANDOS
 COMANDO 		: E ';'
 				| DECLARACAO ';'
 				| ATRIBUICAO ';'
+				| IF
 				;
 
 TIPO			: TK_TIPO_INT
@@ -132,114 +135,151 @@ TIPO			: TK_TIPO_INT
 
 DECLARACAO		: TIPO TK_ID
 				{
-					STRINGMAP* mapa = pilhaDeMapas.front();
-					(*mapa)[$2.label].label = converter();
-					(*mapa)[$2.label].tipo = $1.tipo;
-					
+					MAPA* mapa = pilhaDeMapas.front();
+					if(!verificarDeclaracao($2.label))
+					{
+						(*mapa)[$2.label].label = gerarVarTemp();
+						(*mapa)[$2.label].tipo = $1.tipo;
+					}
+					$$.tipo = (*mapa)[$2.label].tipo;
+					$2.label = (*mapa)[$2.label].label;
 					$$.traducao = $2.traducao + $$.tipo + " " + $2.label;
 					$$.traducao = "";
-						
 				}
 				| DECLARACAO ',' TK_ID
 				{
-					STRINGMAP* mapa = pilhaDeMapas.front();
-					if(!pertenceAoAtualEscopo($3.label))
+					MAPA* mapa = pilhaDeMapas.front();
+					if(!verificarDeclaracao($3.label))
 					{
-						(*mapa)[$3.label].label = converter();
+						(*mapa)[$3.label].label = gerarVarTemp();
 						(*mapa)[$3.label].tipo = $1.tipo;
 					}
+
 					$$.tipo = (*mapa)[$3.label].tipo;
 					$3.label = (*mapa)[$3.label].label;
 					$$.traducao = "";
-
 					
 				}		
 				| DECLARACAO ',' TK_ID '=' E 
 				{	
-					STRINGMAP* mapa = pilhaDeMapas.front();
-					(*mapa)[$3.label].label = converter();
-					(*mapa)[$3.label].tipo = $1.tipo;
-					$$.traducao = $1.traducao + "\n" + $5.traducao + "\t" + $3.label + " = (" + $$.tipo + ") " + $5.label + ";\n";
+					MAPA* mapa = pilhaDeMapas.front();
+					if(!verificarDeclaracao($3.label))
+					{
+						(*mapa)[$3.label].label = gerarVarTemp();
+						(*mapa)[$3.label].tipo = $1.tipo;
+					}
+					$$.tipo = (*mapa)[$3.label].tipo;
+					$3.label = (*mapa)[$3.label].label;
+					if ($$.tipo!=$5.tipo){ $$.traducao = $1.traducao + "\n" + $5.traducao + "\t" + $3.label + " = (" + $$.tipo + ") " + $5.label + ";\n";}	
+					else $$.traducao = $1.traducao + "\n" + $5.traducao + "\t" + $3.label + " = " + $5.label + ";\n";
 				}
-				
 				| TIPO TK_ID '=' E 
-				{	STRINGMAP* mapa = pilhaDeMapas.front();
-					(*mapa)[$2.label].label = converter();
-					(*mapa)[$2.label].tipo = $1.tipo;
-					$$.traducao = $4.traducao + "\t" + $2.label + " = (" + $$.tipo + ") " + $4.label + ";\n";
+				{	
+					MAPA* mapa = pilhaDeMapas.front();
+					if(!verificarDeclaracao($2.label))
+					{
+						(*mapa)[$2.label].label = gerarVarTemp();
+						(*mapa)[$2.label].tipo = $1.tipo;
+					}
+					$$.tipo = (*mapa)[$2.label].tipo;
+					$2.label = (*mapa)[$2.label].label;
+					if ($$.tipo!=$4.tipo){$$.traducao = $4.traducao + "\t" + $2.label + " = (" + $$.tipo + ") " + $4.label + ";\n";}
+					else $$.traducao = $4.traducao + "\t" + $2.label + " = " + $4.label + ";\n";	
 				}
 				;
 
 ATRIBUICAO		: TK_ID '=' E
-				{	STRINGMAP* mapa = pilhaDeMapas.front();
-					(*mapa)[$1.label].label = converter();
-					(*mapa)[$1.label].tipo = $$.tipo;
-					$$.traducao = $3.traducao + '\t' + $1.label + " = ("+ $$.tipo + ") " + $3.label + ";\n" ;
+				{	
+					MAPA* mapa = buscaMapa($1.label);
+					MAPA* mapa2 = buscaMapa($3.label);
+					if(mapa == NULL)
+						yyerror("ERRO: Variável não foi declarada!");
+					if(mapa2==NULL)
+						yyerror("ERRO: Variável não foi declarada!");
+					$$.label = (*mapa)[$1.label].label;
+					$$.tipo = (*mapa)[$1.label].tipo;
+					$1.label = $$.label;
+					$$.traducao = $3.traducao + '\t' + $1.label + " = " + $3.label + ";\n" ;
 
 				}
 				;
 
 E				: E '+' E
-				{
-					$$.label = converter();		
-					$$.traducao = $1.traducao + $3.traducao;
-					if($1.tipo == "int" && $3.tipo == "int")
+				{	
+					MAPA* mapa = pilhaDeMapas.front();
+					$$.label = gerarVarTemp();
+									
+					if ($1.tipo != $3.tipo)
 					{
-						$$.traducao = $1.traducao + $3.traducao + "\t" + $$.label + " = " + $1.label + " + " +$3.label +";\n";
-						$$.tipo = "int";
-					}
-					if($1.tipo == "float" && $3.tipo == "int")
-					{
-						$$.traducao = $1.traducao + $3.traducao + "\t" + $$.label + " = " + $1.label + " + " +"(float)"+ $3.label +";\n";
 						$$.tipo = "float";
+						if ($1.tipo == "int" && $3.tipo == "float"){ $$.traducao = $1.traducao + $3.traducao + "\t" + $$.label + " = ("+ $$.tipo +")" + $1.label + " + " + $3.label +";\n";
+						} else if ($1.tipo == "float" && $3.tipo == "int"){ $$.traducao = $1.traducao + $3.traducao + "\t" + $$.label + " = " + $1.label + " + "  + " (" + $$.tipo +")" +  $3.label +";\n";}
+					}else
+					{	
+						(*mapa)[$$.label].label = $$.label;
+						(*mapa)[$$.label].tipo = $$.tipo;
+						$$.traducao = $1.traducao + $3.traducao + "\t" + $$.label + " = " + $1.label + " + " + $3.label +";\n";					
 					}
-					if($1.tipo == "int" && $3.tipo == "float")
-					{
-						$$.traducao = $1.traducao + $3.traducao + "\t" + $$.label + " = " + "(float)"+ $1.label + " + " + $3.label +";\n";
-						$$.tipo = "float";
-					}
-					if($1.tipo == "float" && $3.tipo == "float")
-					{
-						$$.traducao = $1.traducao + $3.traducao + "\t" + $$.label + " = " + $1.label + " + " + $3.label +";\n";
-						$$.tipo = "float";
-					}				
 				}
 				|E '-' E
 				{
-					STRINGMAP* mapa = pilhaDeMapas.front();
-					//STRINGMAP* mapa = buscarTkId($1.label);
-					$$.label = converter();
-					(*mapa)[$$.label].label = $$.label;
-					(*mapa)[$$.label].tipo = $$.tipo;
-					$$.traducao = $1.traducao + $3.traducao + "\t" + $$.label + " = " + $1.label + " - " + $3.label +";\n";
+					MAPA* mapa = pilhaDeMapas.front();
+					$$.label = gerarVarTemp();
+									
+					if ($1.tipo != $3.tipo){
+						$$.tipo = "float";
+						if ($1.tipo == "int" && $3.tipo == "float"){ $$.traducao = $1.traducao + $3.traducao + "\t" + $$.label + " = ("+$$.tipo+")" + $1.label + " - " + $3.label +";\n";
+						} else if ($1.tipo == "float" && $3.tipo == "int"){ $$.traducao = $1.traducao + $3.traducao + "\t" + $$.label + " = " + $1.label + " - "  + "("+ $$.tipo +")" + $3.label +";\n";}
+					}else
+					{	
+						(*mapa)[$$.label].label = $$.label;
+						(*mapa)[$$.label].tipo = $$.tipo;
+						$$.traducao = $1.traducao + $3.traducao + "\t" + $$.label + " = " + $1.label + " - " + $3.label +";\n";					
+					}
 				}
 				|E '*' E
 				{
-					STRINGMAP* mapa = pilhaDeMapas.front();
-					//STRINGMAP* mapa = buscarTkId($1.label);
-					$$.label = converter();
-					(*mapa)[$$.label].label = $$.label;
-					(*mapa)[$$.label].tipo = $$.tipo;
-					$$.traducao = $1.traducao + $3.traducao + "\t" + $$.label + " = " + $1.label + " * " + $3.label +";\n";		
+					MAPA* mapa = pilhaDeMapas.front();
+					$$.label = gerarVarTemp();
+									
+					if ($1.tipo != $3.tipo){
+						$$.tipo = "float";
+						if ($1.tipo == "int" && $3.tipo == "float"){ $$.traducao = $1.traducao + $3.traducao + "\t" + $$.label + " = ("+$$.tipo+")" + $1.label + " * " + $3.label +";\n";
+						} else if ($1.tipo == "float" && $3.tipo == "int"){ $$.traducao = $1.traducao + $3.traducao + "\t" + $$.label + " = " + $1.label + " * "  + "("+ $$.tipo +")" + $3.label +";\n";}
+					}else
+					{	
+						(*mapa)[$$.label].label = $$.label;
+						(*mapa)[$$.label].tipo = $$.tipo;
+						$$.traducao = $1.traducao + $3.traducao + "\t" + $$.label + " = " + $1.label + " * " + $3.label +";\n";					
+					}
 				}
 				|E '/' E
 				{
-					STRINGMAP* mapa = pilhaDeMapas.front();
-					//STRINGMAP* mapa = buscarTkId($1.label);
-					$$.label = converter();
-					(*mapa)[$$.label].label = $1.label;
-					(*mapa)[$$.label].tipo = $1.tipo;
-					$$.traducao = $1.traducao + $3.traducao + "\t" + $$.label + " = " + $1.label + " / " + $3.label +";\n";
+					MAPA* mapa = pilhaDeMapas.front();
+					$$.label = gerarVarTemp();
+									
+					if ($1.tipo != $3.tipo)
+					{
+						$$.tipo = "float";
+						if ($1.tipo == "int" && $3.tipo == "float"){ $$.traducao = $1.traducao + $3.traducao + "\t" + $$.label + " = ("+$$.tipo+")" + $1.label + " / " + $3.label +";\n";
+						} else if ($1.tipo == "float" && $3.tipo == "int"){ $$.traducao = $1.traducao + $3.traducao + "\t" + $$.label + " = " + $1.label + " / "  + "("+ $$.tipo +")" + $3.label +";\n";}
+					}else
+					{	
+						(*mapa)[$$.label].label = $$.label;
+						(*mapa)[$$.label].tipo = $$.tipo;
+						$$.traducao = $1.traducao + $3.traducao + "\t" + $$.label + " = " + $1.label + " / " + $3.label +";\n";					
+					}
 				}
 				|'(' E ')'
-				{	$$.label = converter();
+				{	
+					$$.label = gerarVarTemp();
 					$$.label = "(" + $2.label + ")";
 					$$.traducao = $2.traducao;	
 				}
 				| TK_INT 
 				{
-					STRINGMAP* mapa = pilhaDeMapas.front();
-					$$.label = converter();
+					MAPA* mapa = pilhaDeMapas.front();
+					$$.label = gerarVarTemp();
 
 					(*mapa)[$$.label].label = $$.label;
 					(*mapa)[$$.label].traducao = $1.traducao;
@@ -249,17 +289,19 @@ E				: E '+' E
 				}
 				| TK_BOOLEAN
 				{
-					STRINGMAP* mapa = pilhaDeMapas.front();
-					$$.label = converter();
+					MAPA* mapa = pilhaDeMapas.front();
+					$$.label = gerarVarTemp();
+					
 					(*mapa)[$$.label].label = $$.label;
 					(*mapa)[$$.label].traducao = $1.traducao;
 					(*mapa)[$$.label].tipo = $$.tipo;
+
 					$$.traducao = $1.traducao + "\t" + $$.label + " = " + $1.label+ ";\n";
 				}
 				| TK_CHAR
 				{
-					STRINGMAP* mapa = pilhaDeMapas.front();
-					$$.label = converter();
+					MAPA* mapa = pilhaDeMapas.front();
+					$$.label = gerarVarTemp();
 					(*mapa)[$$.label].label = $$.label;
 					(*mapa)[$$.label].traducao = $1.traducao;
 					(*mapa)[$$.label].tipo = $$.tipo;
@@ -267,16 +309,16 @@ E				: E '+' E
 				}
 				| TK_ID
 				{	
-					STRINGMAP* mapa = pilhaDeMapas.front();		
-					//STRINGMAP* mapa = buscarTkId($1.label);
-					$$.label=(*mapa)[$1.label].label;
-					$$.tipo=(*mapa)[$1.label].tipo;
+					MAPA* mapa = buscaMapa($1.label);
+					mapa = pilhaDeMapas.front();		
+					$$.label = (*mapa)[$1.label].label;
+					$$.tipo = (*mapa)[$1.label].tipo;
 					$$.traducao = "";
 				}
 				| TK_FLOAT
 				{
-					STRINGMAP* mapa = pilhaDeMapas.front();
-					$$.label = converter();
+					MAPA* mapa = pilhaDeMapas.front();
+					$$.label = gerarVarTemp();
 					(*mapa)[$$.label].label = $$.label;
 					(*mapa)[$$.label].traducao = $1.traducao;
 					(*mapa)[$$.label].tipo = $$.tipo;
@@ -284,61 +326,101 @@ E				: E '+' E
 				}
 				|E TK_E E
 				{
-					$$.label = converter();
-					//$$.label = geradora() ;
-					$$.traducao = $1.traducao + $3.traducao + "\t" + $$.label + " = " + $1.label + " && " + $3.label + ";\n";
+					MAPA* mapa = pilhaDeMapas.front();
+					$$.label = gerarVarTemp();
+					$$.tipo = "boolean";
+					(*mapa)[$$.label].label = $$.label;
+					(*mapa)[$$.label].tipo = $$.tipo;
+					//$$.label = (*mapa)[$$.label].label; 
+					$$.traducao = $1.traducao + $3.traducao + "\t" + $$.label + " = " + $1.label + " && " + $3.label+ ";\n"; 
 				}
 				| E TK_OU E
 				{
-					$$.label = converter();
-					//$$.label = geradora() ;
+					MAPA* mapa = pilhaDeMapas.front();
+					$$.label = gerarVarTemp();
+					$$.tipo = "boolean";
+					(*mapa)[$$.label].label = $$.label;
+					(*mapa)[$$.label].tipo = $$.tipo;
 					$$.traducao = $1.traducao + $3.traducao + "\t" + $$.label + " = " + $1.label + " || " + $3.label + ";\n";
 				}
 				| TK_NEGACAO E
 				{
-					$$.label = converter();
-					//$$.label = geradora() ;
-					$$.traducao = $2.traducao + "\t" +$$.label + " = " + "!" + $2.label + ";\n";
+					MAPA* mapa = pilhaDeMapas.front();
+					$$.label = gerarVarTemp();
+					$$.tipo = "boolean";
+					(*mapa)[$$.label].label = $$.label;
+					(*mapa)[$$.label].tipo = $$.tipo;
+					$$.traducao =  $1.traducao + $2.traducao + "\t" + $$.label + " = " + " !  " + $2.label +";\n";	
+
 				}
 				| E TK_MAIOR E
 				{
-					STRINGMAP* mapa = pilhaDeMapas.front();
-					//STRINGMAP* mapa = buscarTkId($1.label);
-					$$.label = converter();
+					MAPA* mapa = pilhaDeMapas.front();
+					$$.label = gerarVarTemp();
+					$$.tipo = "boolean";
 					(*mapa)[$$.label].label = $$.label;
 					(*mapa)[$$.label].tipo = $$.tipo;
-					$$.label = (*mapa)[$$.label].label; 
-					$$.traducao = $1.traducao + $3.traducao + "\t" + $$.label + " = " + $1.label + " > " + $3.label +";\n";	
+					$$.traducao = $1.traducao + decidirValorBool($3.traducao) + "\t" + $$.label + " = " + $1.label + " > " + $3.label +";\n";
+	
 				}
 				| E TK_MAIOR_IGUAL E
 				{
-					$$.label = converter(); 
-					//$$.label = geradora() ;
-					$$.traducao = $1.traducao + $3.traducao + "\t" + $$.label + " = " + $1.label + " >= " + $3.label + ";\n";	
+					MAPA* mapa = pilhaDeMapas.front();
+					$$.label = gerarVarTemp();
+					$$.tipo = "boolean";
+					(*mapa)[$$.label].label = $$.label;
+					(*mapa)[$$.label].tipo = $$.tipo;
+					$$.traducao = $1.traducao + decidirValorBool($3.traducao) + "\t" + $$.label + " = " + $1.label + " >= " + $3.label + ";\n";	
 				}
 				| E TK_MENOR E
 				{
-					$$.label = converter();
-					//$$.label = geradora() ;
-					$$.traducao = $1.traducao + $3.traducao + "\t" + $$.label + " = " + $1.label + " < " + $3.label + ";\n";	
+					MAPA* mapa = pilhaDeMapas.front();
+					$$.label = gerarVarTemp();
+					$$.tipo = "boolean";
+					(*mapa)[$$.label].label = $$.label;
+					(*mapa)[$$.label].tipo = $$.tipo;
+					$$.traducao = $1.traducao + decidirValorBool($3.traducao) + "\t" + $$.label + " = " + $1.label + " < " + $3.label + ";\n";	
 				}
 				| E TK_MENOR_IGUAL E
 				{
-					$$.label = converter();
-					//$$.label = geradora() ;
-					$$.traducao = $1.traducao + $3.traducao + "\t" +$$.label + " = " + $1.label + " <= " + $3.label + ";\n";	
+					MAPA* mapa = pilhaDeMapas.front();
+					$$.label = gerarVarTemp();
+					$$.tipo = "boolean";
+					(*mapa)[$$.label].label = $$.label;
+					(*mapa)[$$.label].tipo = $$.tipo;
+					$$.traducao = $1.traducao + decidirValorBool($3.traducao) + "\t" +$$.label + " = " + $1.label + " <= " + $3.label + ";\n";	
 				}
 				| E TK_IGUAL E
-				{
-					$$.label = converter();
-					//$$.label = geradora() ;				
-					$$.traducao = $1.traducao + $3.traducao + "\t" + $$.label + " = " + $1.label + " == " + $3.label + ";\n";	
+				{	
+					MAPA* mapa = pilhaDeMapas.front();
+					$$.label = gerarVarTemp();
+					$$.tipo = "boolean";
+					(*mapa)[$$.label].label = $$.label;
+					(*mapa)[$$.label].tipo = $$.tipo;				
+					$$.traducao = $1.traducao + decidirValorBool($3.traducao) + "\t" + $$.label + " = " + $1.label + " == " + $3.label + ";\n";	
 				}
 				| E TK_DIFERENTE E
 				{
-					$$.label = converter();
-					//$$.label = geradora() ;
-					$$.traducao = $1.traducao + $3.traducao + "\t" +$$.label + " = " + $1.label + " != " + $3.label + ";\n";	
+					MAPA* mapa = pilhaDeMapas.front();
+					$$.label = gerarVarTemp();
+					$$.tipo = "boolean";
+					(*mapa)[$$.label].label = $$.label;
+					(*mapa)[$$.label].tipo = $$.tipo;
+					$$.traducao = $1.traducao + decidirValorBool($3.traducao) + "\t" +$$.label + " = " + $1.label + " != " + $3.label + ";\n";	
+				}
+				;
+
+IF 				: TK_IF '(' E ')' BLOCO
+				{	
+					string fimbloco = gerarBloco();
+					$$.traducao = $3.traducao + "\n\tif("+ $3.label +") goto " + fimbloco + ";\n\n" + $5.traducao + "\t" + fimbloco + ":\n";		
+				}
+				| TK_IF '(' E ')' BLOCO TK_ELSE BLOCO
+				{
+					string blocoIf = gerarBloco();
+					string blocoElse = gerarBloco();
+					string fimbloco= gerarBloco();
+					$$.traducao = $3.traducao + "\n\tif (" + $3.label +" == true) goto " + blocoElse + ";\n" + $5.traducao  + "\telse goto " + fimbloco  + ";\n\n\t" + blocoElse + ":\n"+$7.traducao + "\t" + fimbloco + ":\n";
 				}
 				;
 
@@ -354,17 +436,22 @@ int main( int argc, char* argv[] )
 	return 0;
 }
 
+string decidirValorBool(string a)
+{
+	if (a == "verdadeiro") return "true";
+	else if (a == "falso") return "false";
+} 
 
-string converter(){
-	   
+string gerarVarTemp()
+{	   
 	stringstream ss;
-	ss << qtd;
+	ss << q;
 	string str = ss.str();
-	qtd++;
+	q++;
 	return "TEMP" +str; 
 }
 
-string geradora(){
+/*string geradora(){
 	
 	char buffer[50];
 	string temp;
@@ -372,7 +459,7 @@ string geradora(){
 	sprintf(buffer,"temp %d",numero);
 	temp = buffer;
 	return temp;
-}
+}*/
 
 void yyerror( string MSG )
 {
@@ -380,28 +467,37 @@ void yyerror( string MSG )
 	exit (0);
 }		
 
-STRINGMAP* buscarTkId(string label)
+MAPA* buscaMapa(string label)
 {
-	list<STRINGMAP*>::iterator i;
+	list<MAPA*>::iterator i;
 	for(i = pilhaDeMapas.begin(); i != pilhaDeMapas.end(); i++)
 	{
-		STRINGMAP* mapa = *i;
+		MAPA* mapa = *i;
 		if(mapa->find(label) != mapa->end()) {return mapa;}
 	}
 	return NULL;
-}		
+}
 
-bool pertenceAoAtualEscopo(string label)
+string gerarBloco()
+{	
+	static int bloco = 0;
+	stringstream label;
+	label << "bloco " << bloco++;
+	return label.str();
+}
+	
+bool verificarDeclaracao(string label)
 {
-	STRINGMAP* mapa = pilhaDeMapas.front();
-	if(mapa->find(label) == mapa->end()) return false;
+	MAPA* mapa = pilhaDeMapas.front();
+	if(mapa->find(label) == mapa->end())
+	return false;
 	else return true;	
 }
 
 string declaracoes()
 {
-	STRINGMAP mapa = *pilhaDeMapas.front();
-	STRINGMAP::iterator i;
+	MAPA mapa = *pilhaDeMapas.front();
+	MAPA::iterator i;
 	stringstream s;
 	for(i = mapa.begin(); i != mapa.end(); i++){
 		s << i->second.tipo << " " << i->second.label << ";\n";
