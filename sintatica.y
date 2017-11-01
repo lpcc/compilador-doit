@@ -30,7 +30,6 @@ MAPA* buscaMapa (string label);
 string declaracoes();
 bool verificarDeclaracao(string label);
 string gerarBloco();
-string decidirValorBool(string a);
 
 %}
 %token TK_MAIN
@@ -46,6 +45,7 @@ string decidirValorBool(string a);
 %left '+' '-' '*' '/'
 %left TK_E TK_OU TK_NEGACAO
 %left TK_MAIOR TK_MAIOR_IGUAL TK_MENOR TK_MENOR_IGUAL TK_IGUAL TK_DIFERENTE
+%left TK_CAST
 
 %%
 
@@ -212,6 +212,8 @@ E				: E '+' E
 					if ($1.tipo != $3.tipo)
 					{
 						$$.tipo = "float";
+						(*mapa)[$$.label].label = $$.label;
+						(*mapa)[$$.label].tipo = $$.tipo;
 						if ($1.tipo == "int" && $3.tipo == "float"){ $$.traducao = $1.traducao + $3.traducao + "\t" + $$.label + " = ("+ $$.tipo +")" + $1.label + " + " + $3.label +";\n";
 						} else if ($1.tipo == "float" && $3.tipo == "int"){ $$.traducao = $1.traducao + $3.traducao + "\t" + $$.label + " = " + $1.label + " + "  + " (" + $$.tipo +")" +  $3.label +";\n";}
 					}else
@@ -228,6 +230,8 @@ E				: E '+' E
 									
 					if ($1.tipo != $3.tipo){
 						$$.tipo = "float";
+						(*mapa)[$$.label].label = $$.label;
+						(*mapa)[$$.label].tipo = $$.tipo;
 						if ($1.tipo == "int" && $3.tipo == "float"){ $$.traducao = $1.traducao + $3.traducao + "\t" + $$.label + " = ("+$$.tipo+")" + $1.label + " - " + $3.label +";\n";
 						} else if ($1.tipo == "float" && $3.tipo == "int"){ $$.traducao = $1.traducao + $3.traducao + "\t" + $$.label + " = " + $1.label + " - "  + "("+ $$.tipo +")" + $3.label +";\n";}
 					}else
@@ -244,6 +248,8 @@ E				: E '+' E
 									
 					if ($1.tipo != $3.tipo){
 						$$.tipo = "float";
+						(*mapa)[$$.label].label = $$.label;
+						(*mapa)[$$.label].tipo = $$.tipo;
 						if ($1.tipo == "int" && $3.tipo == "float"){ $$.traducao = $1.traducao + $3.traducao + "\t" + $$.label + " = ("+$$.tipo+")" + $1.label + " * " + $3.label +";\n";
 						} else if ($1.tipo == "float" && $3.tipo == "int"){ $$.traducao = $1.traducao + $3.traducao + "\t" + $$.label + " = " + $1.label + " * "  + "("+ $$.tipo +")" + $3.label +";\n";}
 					}else
@@ -261,6 +267,8 @@ E				: E '+' E
 					if ($1.tipo != $3.tipo)
 					{
 						$$.tipo = "float";
+						(*mapa)[$$.label].label = $$.label;
+						(*mapa)[$$.label].tipo = $$.tipo;
 						if ($1.tipo == "int" && $3.tipo == "float"){ $$.traducao = $1.traducao + $3.traducao + "\t" + $$.label + " = ("+$$.tipo+")" + $1.label + " / " + $3.label +";\n";
 						} else if ($1.tipo == "float" && $3.tipo == "int"){ $$.traducao = $1.traducao + $3.traducao + "\t" + $$.label + " = " + $1.label + " / "  + "("+ $$.tipo +")" + $3.label +";\n";}
 					}else
@@ -331,7 +339,6 @@ E				: E '+' E
 					$$.tipo = "boolean";
 					(*mapa)[$$.label].label = $$.label;
 					(*mapa)[$$.label].tipo = $$.tipo;
-					//$$.label = (*mapa)[$$.label].label; 
 					$$.traducao = $1.traducao + $3.traducao + "\t" + $$.label + " = " + $1.label + " && " + $3.label+ ";\n"; 
 				}
 				| E TK_OU E
@@ -360,7 +367,7 @@ E				: E '+' E
 					$$.tipo = "boolean";
 					(*mapa)[$$.label].label = $$.label;
 					(*mapa)[$$.label].tipo = $$.tipo;
-					$$.traducao = $1.traducao + decidirValorBool($3.traducao) + "\t" + $$.label + " = " + $1.label + " > " + $3.label +";\n";
+					$$.traducao = $1.traducao + $3.traducao + "\t" + $$.label + " = " + $1.label + " > " + $3.label +";\n";
 	
 				}
 				| E TK_MAIOR_IGUAL E
@@ -370,7 +377,7 @@ E				: E '+' E
 					$$.tipo = "boolean";
 					(*mapa)[$$.label].label = $$.label;
 					(*mapa)[$$.label].tipo = $$.tipo;
-					$$.traducao = $1.traducao + decidirValorBool($3.traducao) + "\t" + $$.label + " = " + $1.label + " >= " + $3.label + ";\n";	
+					$$.traducao = $1.traducao + $3.traducao + "\t" + $$.label + " = " + $1.label + " >= " + $3.label + ";\n";	
 				}
 				| E TK_MENOR E
 				{
@@ -379,7 +386,7 @@ E				: E '+' E
 					$$.tipo = "boolean";
 					(*mapa)[$$.label].label = $$.label;
 					(*mapa)[$$.label].tipo = $$.tipo;
-					$$.traducao = $1.traducao + decidirValorBool($3.traducao) + "\t" + $$.label + " = " + $1.label + " < " + $3.label + ";\n";	
+					$$.traducao = $1.traducao + $3.traducao + "\t" + $$.label + " = " + $1.label + " < " + $3.label + ";\n";	
 				}
 				| E TK_MENOR_IGUAL E
 				{
@@ -388,7 +395,7 @@ E				: E '+' E
 					$$.tipo = "boolean";
 					(*mapa)[$$.label].label = $$.label;
 					(*mapa)[$$.label].tipo = $$.tipo;
-					$$.traducao = $1.traducao + decidirValorBool($3.traducao) + "\t" +$$.label + " = " + $1.label + " <= " + $3.label + ";\n";	
+					$$.traducao = $1.traducao + $3.traducao + "\t" +$$.label + " = " + $1.label + " <= " + $3.label + ";\n";	
 				}
 				| E TK_IGUAL E
 				{	
@@ -397,7 +404,7 @@ E				: E '+' E
 					$$.tipo = "boolean";
 					(*mapa)[$$.label].label = $$.label;
 					(*mapa)[$$.label].tipo = $$.tipo;				
-					$$.traducao = $1.traducao + decidirValorBool($3.traducao) + "\t" + $$.label + " = " + $1.label + " == " + $3.label + ";\n";	
+					$$.traducao = $1.traducao + $3.traducao + "\t" + $$.label + " = " + $1.label + " == " + $3.label + ";\n";	
 				}
 				| E TK_DIFERENTE E
 				{
@@ -406,7 +413,16 @@ E				: E '+' E
 					$$.tipo = "boolean";
 					(*mapa)[$$.label].label = $$.label;
 					(*mapa)[$$.label].tipo = $$.tipo;
-					$$.traducao = $1.traducao + decidirValorBool($3.traducao) + "\t" +$$.label + " = " + $1.label + " != " + $3.label + ";\n";	
+					$$.traducao = $1.traducao + $3.traducao + "\t" +$$.label + " = " + $1.label + " != " + $3.label + ";\n";	
+				}
+				| TK_CAST E
+				{
+					MAPA* mapa = pilhaDeMapas.front();
+					$$.label = gerarVarTemp();
+					$$.tipo = $1.tipo;
+					(*mapa)[$$.label].label = $$.label;
+					(*mapa)[$$.label].tipo = $$.tipo;
+					$$.traducao = $2.traducao + '\t' + $$.label + " = (" + $1.tipo + ") " + $2.label + ";\n";
 				}
 				;
 
@@ -435,12 +451,6 @@ int main( int argc, char* argv[] )
 	yyparse();
 	return 0;
 }
-
-string decidirValorBool(string a)
-{
-	if (a == "verdadeiro") return "true";
-	else if (a == "falso") return "false";
-} 
 
 string gerarVarTemp()
 {	   

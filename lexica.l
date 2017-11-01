@@ -58,6 +58,10 @@ ID {LETRA}({LETRA}|{NUM})*
 
 "!"			{return TK_NEGACAO;}
 
+"(int)"		{ yylval.tipo = "int"; return TK_CAST;}
+
+"(float)"	{ yylval.tipo = "float"; return TK_CAST;}
+
 {NUM}		{ yylval.label = yytext; yylval.tipo = "int" ;return TK_INT;}
 
 {BOOLEAN}	{ yylval.label = yytext; yylval.tipo = "boolean" ;return TK_BOOLEAN;}
