@@ -24,9 +24,9 @@ ID {LETRA}({LETRA}|{NUM})*
 
 "boolean"	{return TK_TIPO_BOOLEAN;}
 
-"if"		{ return TK_IF; }
+"if"		{return TK_IF;}
 
-"else"		{ return TK_ELSE; }
+"else"		{return TK_ELSE;}
 
 "int"		{return TK_TIPO_INT;}
 
@@ -58,13 +58,17 @@ ID {LETRA}({LETRA}|{NUM})*
 
 "!"			{return TK_NEGACAO;}
 
+"++"		{ yylval.label = yytext; return TK_INC;}
+
+"--"		{ yylval.label = yytext; return TK_DEC;}
+
 "(int)"		{ yylval.tipo = "int"; return TK_CAST;}
 
 "(float)"	{ yylval.tipo = "float"; return TK_CAST;}
 
-{NUM}		{ yylval.label = yytext; yylval.tipo = "int" ;return TK_INT;}
+{NUM}		{ yylval.label = yytext; yylval.tipo = "int" ; return TK_INT;}
 
-{BOOLEAN}	{ yylval.label = yytext; yylval.tipo = "boolean" ;return TK_BOOLEAN;}
+{BOOLEAN}	{ yylval.label = yytext; yylval.tipo = "boolean" ; return TK_BOOLEAN;}
 
 {REAL}		{ yylval.label = yytext; yylval.tipo = "float"; return TK_FLOAT;}
 

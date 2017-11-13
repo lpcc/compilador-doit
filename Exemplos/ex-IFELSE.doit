@@ -1,0 +1,9 @@
+int main()
+{
+	int d,f;
+	d = 3;
+	f = 4;
+	if(d==f){}else{}
+	
+	
+}

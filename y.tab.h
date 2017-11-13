@@ -68,7 +68,9 @@ extern int yydebug;
     TK_ERROR = 278,
     TK_IF = 279,
     TK_ELSE = 280,
-    TK_CAST = 281
+    TK_INC = 281,
+    TK_DEC = 282,
+    TK_CAST = 283
   };
 #endif
 /* Tokens.  */
@@ -95,7 +97,9 @@ extern int yydebug;
 #define TK_ERROR 278
 #define TK_IF 279
 #define TK_ELSE 280
-#define TK_CAST 281
+#define TK_INC 281
+#define TK_DEC 282
+#define TK_CAST 283
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED

@@ -30,6 +30,7 @@ MAPA* buscaMapa (string label);
 string declaracoes();
 bool verificarDeclaracao(string label);
 string gerarBloco();
+string valorBoolean (string a);
 
 %}
 %token TK_MAIN
@@ -39,6 +40,7 @@ string gerarBloco();
 %token TK_DIFERENTE TK_OU TK_E TK_NEGACAO
 %token TK_FIM TK_ERROR
 %token TK_IF TK_ELSE
+%token TK_INC TK_DEC
 
 %start START
 
@@ -51,7 +53,7 @@ string gerarBloco();
 
 START			: ESCOPO_GLOBAL MAIN
 				{ 
-					cout << "\n*Compilador DOIT* \n#include<string.h>\n#include<iostream>\n#include<stdio.h>\nusing namespace std;\n" << endl;
+					cout << "\n*Compilador DOIT* \n#include<string.h>\n#include<iostream>\n#include<stdio.h>\ntypedef enum { false, true } bool;\n" << endl;
 					cout << variaveis << endl;
 					declaracoes();			
 					cout << $2.traducao << endl;
@@ -131,6 +133,13 @@ TIPO			: TK_TIPO_INT
 					$$.label = "char";
 					$$.tipo = "char";
 				}
+				/*
+				|	TK_TIPO_STRING
+				{
+					$$.label = "string";
+					$$.tipo = "string";
+				}
+				*/
 				; 
 
 DECLARACAO		: TIPO TK_ID
@@ -191,16 +200,71 @@ DECLARACAO		: TIPO TK_ID
 ATRIBUICAO		: TK_ID '=' E
 				{	
 					MAPA* mapa = buscaMapa($1.label);
-					MAPA* mapa2 = buscaMapa($3.label);
 					if(mapa == NULL)
 						yyerror("ERRO: Variável não foi declarada!");
-					if(mapa2==NULL)
-						yyerror("ERRO: Variável não foi declarada!");
-					$$.label = (*mapa)[$1.label].label;
-					$$.tipo = (*mapa)[$1.label].tipo;
-					$1.label = $$.label;
-					$$.traducao = $3.traducao + '\t' + $1.label + " = " + $3.label + ";\n" ;
 
+					$$.tipo = (*mapa)[$1.label].tipo;
+
+					//Caso Diferente faz a cast, senão faz atribuição normal
+					if($$.tipo != $3.tipo){
+						$$.label = (*mapa)[$1.label].label;
+						$$.tipo = (*mapa)[$1.label].tipo;
+						$1.label = $$.label;
+						$$.traducao = $3.traducao + '\t' + $1.label + " = (" + $$.tipo + ")"+ $3.label + ";\n" ;
+					}else{
+						$$.label = (*mapa)[$1.label].label;
+						$$.tipo = (*mapa)[$1.label].tipo;
+						$1.label = $$.label;
+						$$.traducao = $3.traducao + '\t' + $1.label + " = " + $3.label + ";\n" ;
+					}
+					
+
+				}
+				| TK_ID TK_INC 
+				{	
+					MAPA* mapa = buscaMapa($1.label);
+					if(mapa == NULL)
+						yyerror("ERRO: Variável não foi declarada!");
+					$1.label = (*mapa)[$1.label].label;
+					$1.traducao = "";
+					$$.traducao = $1.traducao + "\t";
+
+					if ($2.label == "++")$$.traducao += $1.label + " = " + $1.label + " + 1;\n";
+						
+				}
+				| TK_ID TK_DEC
+				{	
+					MAPA* mapa = buscaMapa($1.label);
+					if(mapa == NULL)
+						yyerror("ERRO: Variável não foi declarada!");
+					$1.label = (*mapa)[$1.label].label;
+					$1.traducao = "";
+					$$.traducao = $1.traducao + "\t";
+
+					if ($2.label == "--") $$.traducao += $1.label + " = " + $1.label + " - 1;\n";
+						
+				}	
+				| TK_INC TK_ID
+				{	
+					MAPA* mapa = buscaMapa($2.label);
+					if(mapa == NULL)
+						yyerror("ERRO: Variável não foi declarada!");
+					$2.label = (*mapa)[$2.label].label;
+					$2.traducao = "";
+					$$.traducao = $2.traducao + "\t";
+
+					if ($1.label == "++")$$.traducao += $2.label + " = " + $2.label + " + 1;\n";
+				}
+				| TK_DEC TK_ID
+				{	
+					MAPA* mapa = buscaMapa($2.label);
+					if(mapa == NULL)
+						yyerror("ERRO: Variável não foi declarada!");
+					$2.label = (*mapa)[$2.label].label;
+					$2.traducao = "";
+					$$.traducao = $2.traducao + "\t";
+
+					if ($1.label == "--")$$.traducao += $2.label + " = " + $2.label + " - 1;\n";
 				}
 				;
 
@@ -214,8 +278,22 @@ E				: E '+' E
 						$$.tipo = "float";
 						(*mapa)[$$.label].label = $$.label;
 						(*mapa)[$$.label].tipo = $$.tipo;
-						if ($1.tipo == "int" && $3.tipo == "float"){ $$.traducao = $1.traducao + $3.traducao + "\t" + $$.label + " = ("+ $$.tipo +")" + $1.label + " + " + $3.label +";\n";
-						} else if ($1.tipo == "float" && $3.tipo == "int"){ $$.traducao = $1.traducao + $3.traducao + "\t" + $$.label + " = " + $1.label + " + "  + " (" + $$.tipo +")" +  $3.label +";\n";}
+
+						if ($1.tipo == "int" && $3.tipo == "float"){ 
+							string tempCast = gerarVarTemp();
+			            	string traducaoCast = "\t" + tempCast + " = " + "(float)" + $1.label + ";\n";
+			            	$1.label = tempCast;
+			            	(*mapa)[$1.label].label = $1.label;
+							(*mapa)[$1.label].tipo = $3.tipo;
+          					$$.traducao = $1.traducao + $3.traducao + traducaoCast + "\t" + $$.label + " = " + $1.label + " + " + $3.label +";\n";
+						} else if ($1.tipo == "float" && $3.tipo == "int"){ 
+							string tempCast = gerarVarTemp();
+			            	string traducaoCast = "\t" + tempCast + " = " + "(float)" + $3.label + ";\n";
+			            	$3.label = tempCast;
+			            	(*mapa)[$3.label].label = $3.label;
+							(*mapa)[$3.label].tipo = $1.tipo;
+          					$$.traducao = $1.traducao + $3.traducao + traducaoCast + "\t" + $$.label + " = " + $1.label + " + " + $3.label +";\n";
+						}
 					}else
 					{	
 						(*mapa)[$$.label].label = $$.label;
@@ -228,12 +306,27 @@ E				: E '+' E
 					MAPA* mapa = pilhaDeMapas.front();
 					$$.label = gerarVarTemp();
 									
-					if ($1.tipo != $3.tipo){
+					if ($1.tipo != $3.tipo)
+					{
 						$$.tipo = "float";
 						(*mapa)[$$.label].label = $$.label;
 						(*mapa)[$$.label].tipo = $$.tipo;
-						if ($1.tipo == "int" && $3.tipo == "float"){ $$.traducao = $1.traducao + $3.traducao + "\t" + $$.label + " = ("+$$.tipo+")" + $1.label + " - " + $3.label +";\n";
-						} else if ($1.tipo == "float" && $3.tipo == "int"){ $$.traducao = $1.traducao + $3.traducao + "\t" + $$.label + " = " + $1.label + " - "  + "("+ $$.tipo +")" + $3.label +";\n";}
+
+						if ($1.tipo == "int" && $3.tipo == "float"){ 
+							string tempCast = gerarVarTemp();
+			            	string traducaoCast = "\t" + tempCast + " = " + "(float)" + $1.label + ";\n";
+			            	$1.label = tempCast;
+			            	(*mapa)[$1.label].label = $1.label;
+							(*mapa)[$1.label].tipo = $3.tipo;
+          					$$.traducao = $1.traducao + $3.traducao + traducaoCast + "\t" + $$.label + " = " + $1.label + " - " + $3.label +";\n";
+						} else if ($1.tipo == "float" && $3.tipo == "int"){ 
+							string tempCast = gerarVarTemp();
+			            	string traducaoCast = "\t" + tempCast + " = " + "(float)" + $3.label + ";\n";
+			            	$3.label = tempCast;
+			            	(*mapa)[$3.label].label = $3.label;
+							(*mapa)[$3.label].tipo = $1.tipo;
+          					$$.traducao = $1.traducao + $3.traducao + traducaoCast + "\t" + $$.label + " = " + $1.label + " - " + $3.label +";\n";
+						}
 					}else
 					{	
 						(*mapa)[$$.label].label = $$.label;
@@ -246,12 +339,27 @@ E				: E '+' E
 					MAPA* mapa = pilhaDeMapas.front();
 					$$.label = gerarVarTemp();
 									
-					if ($1.tipo != $3.tipo){
+					if ($1.tipo != $3.tipo)
+					{
 						$$.tipo = "float";
 						(*mapa)[$$.label].label = $$.label;
 						(*mapa)[$$.label].tipo = $$.tipo;
-						if ($1.tipo == "int" && $3.tipo == "float"){ $$.traducao = $1.traducao + $3.traducao + "\t" + $$.label + " = ("+$$.tipo+")" + $1.label + " * " + $3.label +";\n";
-						} else if ($1.tipo == "float" && $3.tipo == "int"){ $$.traducao = $1.traducao + $3.traducao + "\t" + $$.label + " = " + $1.label + " * "  + "("+ $$.tipo +")" + $3.label +";\n";}
+
+						if ($1.tipo == "int" && $3.tipo == "float"){ 
+							string tempCast = gerarVarTemp();
+			            	string traducaoCast = "\t" + tempCast + " = " + "(float)" + $1.label + ";\n";
+			            	$1.label = tempCast;
+			            	(*mapa)[$1.label].label = $1.label;
+							(*mapa)[$1.label].tipo = $3.tipo;
+          					$$.traducao = $1.traducao + $3.traducao + traducaoCast + "\t" + $$.label + " = " + $1.label + " * " + $3.label +";\n";
+						} else if ($1.tipo == "float" && $3.tipo == "int"){ 
+							string tempCast = gerarVarTemp();
+			            	string traducaoCast = "\t" + tempCast + " = " + "(float)" + $3.label + ";\n";
+			            	$3.label = tempCast;
+			            	(*mapa)[$3.label].label = $3.label;
+							(*mapa)[$3.label].tipo = $1.tipo;
+          					$$.traducao = $1.traducao + $3.traducao + traducaoCast + "\t" + $$.label + " = " + $1.label + " * " + $3.label +";\n";
+						}
 					}else
 					{	
 						(*mapa)[$$.label].label = $$.label;
@@ -269,8 +377,22 @@ E				: E '+' E
 						$$.tipo = "float";
 						(*mapa)[$$.label].label = $$.label;
 						(*mapa)[$$.label].tipo = $$.tipo;
-						if ($1.tipo == "int" && $3.tipo == "float"){ $$.traducao = $1.traducao + $3.traducao + "\t" + $$.label + " = ("+$$.tipo+")" + $1.label + " / " + $3.label +";\n";
-						} else if ($1.tipo == "float" && $3.tipo == "int"){ $$.traducao = $1.traducao + $3.traducao + "\t" + $$.label + " = " + $1.label + " / "  + "("+ $$.tipo +")" + $3.label +";\n";}
+
+						if ($1.tipo == "int" && $3.tipo == "float"){ 
+							string tempCast = gerarVarTemp();
+			            	string traducaoCast = "\t" + tempCast + " = " + "(float)" + $1.label + ";\n";
+			            	$1.label = tempCast;
+			            	(*mapa)[$1.label].label = $1.label;
+							(*mapa)[$1.label].tipo = $3.tipo;
+          					$$.traducao = $1.traducao + $3.traducao + traducaoCast + "\t" + $$.label + " = " + $1.label + " / " + $3.label +";\n";
+						} else if ($1.tipo == "float" && $3.tipo == "int"){ 
+							string tempCast = gerarVarTemp();
+			            	string traducaoCast = "\t" + tempCast + " = " + "(float)" + $3.label + ";\n";
+			            	$3.label = tempCast;
+			            	(*mapa)[$3.label].label = $3.label;
+							(*mapa)[$3.label].tipo = $1.tipo;
+          					$$.traducao = $1.traducao + $3.traducao + traducaoCast + "\t" + $$.label + " = " + $1.label + " / " + $3.label +";\n";
+						}
 					}else
 					{	
 						(*mapa)[$$.label].label = $$.label;
@@ -436,7 +558,7 @@ IF 				: TK_IF '(' E ')' BLOCO
 					string blocoIf = gerarBloco();
 					string blocoElse = gerarBloco();
 					string fimbloco= gerarBloco();
-					$$.traducao = $3.traducao + "\n\tif (" + $3.label +" == true) goto " + blocoElse + ";\n" + $5.traducao  + "\telse goto " + fimbloco  + ";\n\n\t" + blocoElse + ":\n"+$7.traducao + "\t" + fimbloco + ":\n";
+					$$.traducao = $3.traducao + "\n\tif (" + $3.label +") goto " + blocoElse + ";\n" + $5.traducao  + "\telse goto " + fimbloco  + ";\n\n\t" + blocoElse + ":\n"+$7.traducao + "\t" + fimbloco + ":\n";
 				}
 				;
 
@@ -510,8 +632,17 @@ string declaracoes()
 	MAPA::iterator i;
 	stringstream s;
 	for(i = mapa.begin(); i != mapa.end(); i++){
-		s << i->second.tipo << " " << i->second.label << ";\n";
+		if(i->second.tipo == "boolean"){
+			continue;
+		}else{
+			s << i->second.tipo << " " << i->second.label << ";\n";
+		}
 	}
 	variaveis += s.str() + "\n";
 	return variaveis;
+}
+
+string valorBoolean (string a) {
+	if (a == "true") return "1";
+	else if (a == "false") return "0";
 }
