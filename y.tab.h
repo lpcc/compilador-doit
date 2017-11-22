@@ -50,27 +50,35 @@ extern int yydebug;
     TK_TIPO_FLOAT = 260,
     TK_TIPO_CHAR = 261,
     TK_TIPO_INT = 262,
-    TK_BOOLEAN = 263,
-    TK_FLOAT = 264,
-    TK_CHAR = 265,
-    TK_INT = 266,
-    TK_ID = 267,
-    TK_MAIOR = 268,
-    TK_MAIOR_IGUAL = 269,
-    TK_MENOR = 270,
-    TK_MENOR_IGUAL = 271,
-    TK_IGUAL = 272,
-    TK_DIFERENTE = 273,
-    TK_OU = 274,
-    TK_E = 275,
-    TK_NEGACAO = 276,
-    TK_FIM = 277,
-    TK_ERROR = 278,
-    TK_IF = 279,
-    TK_ELSE = 280,
-    TK_INC = 281,
-    TK_DEC = 282,
-    TK_CAST = 283
+    TK_TIPO_STRING = 263,
+    TK_BOOLEAN = 264,
+    TK_FLOAT = 265,
+    TK_CHAR = 266,
+    TK_INT = 267,
+    TK_ID = 268,
+    TK_STRING = 269,
+    TK_MAIOR = 270,
+    TK_MAIOR_IGUAL = 271,
+    TK_MENOR = 272,
+    TK_MENOR_IGUAL = 273,
+    TK_IGUAL = 274,
+    TK_DIFERENTE = 275,
+    TK_OU = 276,
+    TK_E = 277,
+    TK_NEGACAO = 278,
+    TK_FIM = 279,
+    TK_ERROR = 280,
+    TK_IF = 281,
+    TK_ELSE = 282,
+    TK_WHILE = 283,
+    TK_SWITCH = 284,
+    TK_CASE = 285,
+    TK_DO = 286,
+    TK_FOR = 287,
+    TK_COUT = 288,
+    TK_INC = 289,
+    TK_INC_ABREV = 290,
+    TK_CAST = 291
   };
 #endif
 /* Tokens.  */
@@ -79,27 +87,35 @@ extern int yydebug;
 #define TK_TIPO_FLOAT 260
 #define TK_TIPO_CHAR 261
 #define TK_TIPO_INT 262
-#define TK_BOOLEAN 263
-#define TK_FLOAT 264
-#define TK_CHAR 265
-#define TK_INT 266
-#define TK_ID 267
-#define TK_MAIOR 268
-#define TK_MAIOR_IGUAL 269
-#define TK_MENOR 270
-#define TK_MENOR_IGUAL 271
-#define TK_IGUAL 272
-#define TK_DIFERENTE 273
-#define TK_OU 274
-#define TK_E 275
-#define TK_NEGACAO 276
-#define TK_FIM 277
-#define TK_ERROR 278
-#define TK_IF 279
-#define TK_ELSE 280
-#define TK_INC 281
-#define TK_DEC 282
-#define TK_CAST 283
+#define TK_TIPO_STRING 263
+#define TK_BOOLEAN 264
+#define TK_FLOAT 265
+#define TK_CHAR 266
+#define TK_INT 267
+#define TK_ID 268
+#define TK_STRING 269
+#define TK_MAIOR 270
+#define TK_MAIOR_IGUAL 271
+#define TK_MENOR 272
+#define TK_MENOR_IGUAL 273
+#define TK_IGUAL 274
+#define TK_DIFERENTE 275
+#define TK_OU 276
+#define TK_E 277
+#define TK_NEGACAO 278
+#define TK_FIM 279
+#define TK_ERROR 280
+#define TK_IF 281
+#define TK_ELSE 282
+#define TK_WHILE 283
+#define TK_SWITCH 284
+#define TK_CASE 285
+#define TK_DO 286
+#define TK_FOR 287
+#define TK_COUT 288
+#define TK_INC 289
+#define TK_INC_ABREV 290
+#define TK_CAST 291
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED

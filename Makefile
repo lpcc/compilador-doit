@@ -29,7 +29,7 @@ ex3:
 		yacc -d sintatica.y
 		g++ -o glf y.tab.c -lfl
 
-		./glf < Exemplos/ex-INCDEC.doit
+		./glf < Exemplos/ex-INC.doit
 
 ex4: 	
 		clear
@@ -54,3 +54,4 @@ ex6:
 		g++ -o glf y.tab.c -lfl
 
 		./glf < Exemplos/ex-BOOL.doit
+
